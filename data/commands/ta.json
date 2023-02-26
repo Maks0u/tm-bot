@@ -1,0 +1,10 @@
+{
+  "config": {
+    "name": "ta",
+    "description": "1v1 SunSet TA",
+    "type": 1
+  },
+  "response": {
+    "type": 5
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "config": {
+    "name": "hi",
+    "description": "Greetings",
+    "type": 1
+  },
+  "response": {
+    "type": 4,
+    "data": {
+      "content": "Hello there!"
+    }
+  }
+}

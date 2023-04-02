@@ -1,30 +1,26 @@
 import Message from './Message.js';
-import TA from './processors/TA.js';
 
 export default class Command {
     private readonly config: CommandConfig;
     private readonly response: CommandResponse;
 
-    constructor(config: CommandConfig, response: CommandResponse, process?: ProcessFunction) {
+    constructor(config: CommandConfig, response: CommandResponse, process: ProcessFunction) {
         this.config = config;
         this.response = response;
-        this.process = process || this.process;
+        this.process = process;
     }
 
-    getName() {
+    getName(): string {
         return this.getConfig().name;
     }
-    getConfig() {
+    getConfig(): CommandConfig {
         return this.config;
     }
-    getResponse() {
+    getResponse(): CommandResponse {
         return this.response;
     }
-    process(data: IncomingCommandData): Promise<Message> {
-        if ('ta' === this.getName()) {
-            return TA.process(data);
-        }
-        return Promise.resolve(new Message());
+    async process(data: IncomingCommandData): Promise<Message> {
+        return new Message();
     }
 }
 
@@ -33,13 +29,13 @@ export interface ProcessFunction {
 }
 export interface CommandResponse {
     type: number;
-    data: Message;
+    data?: Message;
 }
 export interface CommandConfig {
     name: string;
     description: string;
     type: number;
-    options: (SubCommandConfig | SubCommandGroupConfig)[];
+    options?: (SubCommandConfig | SubCommandGroupConfig)[];
 }
 export interface SubCommandConfig {
     name: string;

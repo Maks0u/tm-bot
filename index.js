@@ -1,7 +1,7 @@
-import App from './src/App.js';
+import App from './dist/App.js';
 
 const app = new App();
 
-app.loadCommands().installCommands();
 // app.loadCommands();
+app.loadCommands().installCommands();
 // app.start(parseInt(process.env.DISCORD_PORT), process.env.DISCORD_HOST);

@@ -1,10 +1,11 @@
 import express, { NextFunction, Request, Response } from 'express';
-import axios, { AxiosInstance } from 'axios';
+import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import { StatusCodes } from 'http-status-codes';
 import { inspect } from 'util';
 import { InteractionResponseType, InteractionType, verifyKeyMiddleware } from 'discord-interactions';
 import logger, { italic, white } from 'logger';
 import Commands from './Commands.js';
+import { CommandConfig } from './Command.js';
 
 export default class App {
     private readonly server: express.Express = express();
@@ -82,52 +83,55 @@ export default class App {
         }
     }
 
-    request(endpoint: string, method: string = 'GET', data: object = {}) {
+    request(endpoint: string, method: string = 'GET', data: object = {}): Promise<AxiosResponse> {
         logger.http(`Sending request - ${method} ${endpoint}`);
         return this.AXIOS.request({ method: method, url: endpoint, data: data });
     }
 
-    loadCommands(path?: string) {
-        path = path || './data/commands';
-        this.commands = new Commands(path);
+    loadCommands(): App {
+        this.commands = new Commands();
         logger.debug(inspect(this.commands));
         return this;
     }
 
-    installCommands() {
+    private pushCommands(configs: CommandConfig[]): Promise<AxiosResponse> {
+        return this.request(`applications/${this.APP_ID}/commands`, 'PUT', configs);
+    }
+
+    installCommands(): void | Promise<AxiosResponse> {
         if (!this.commands || !this.commands.size) {
-            return this;
+            return;
         }
         logger.info('Installing commands...');
-        return this.request(`applications/${this.APP_ID}/commands`, 'PUT', this.commands.getConfigs());
+        return this.pushCommands(this.commands.getConfigs());
     }
 
-    uninstallCommands() {
+    uninstallCommands(): Promise<AxiosResponse> {
         logger.info('Uninstalling commands...');
-        return this.request(`applications/${this.APP_ID}/commands`, 'PUT', []);
+        return this.pushCommands([]);
     }
 
-    sendMessage(channelId: string, data: object) {
+    sendMessage(channelId: string, data: object): Promise<AxiosResponse> {
         logger.info(`Sending message to ${channelId}`);
         return this.request(`channels/${channelId}/messages`, 'POST', data);
     }
 
-    updateMessage(channelId: string, messageId: string, data: object) {
+    updateMessage(channelId: string, messageId: string, data: object): Promise<AxiosResponse> {
         logger.info(`Update message ${channelId} ${messageId}`);
         return this.request(`channels/${channelId}/messages/${messageId}`, 'PATCH', data);
     }
 
-    deleteMessage(channelId: string, messageId: string) {
+    deleteMessage(channelId: string, messageId: string): Promise<AxiosResponse> {
         logger.info(`Delete message ${channelId} ${messageId}`);
         return this.request(`channels/${channelId}/messages/${messageId}`, 'DELETE');
     }
 
-    updateInteractionMessage(interactionToken: string, data: object) {
+    updateInteractionMessage(interactionToken: string, data: object): Promise<AxiosResponse> {
         logger.info(`Update interaction message`);
         return this.request(`webhooks/${this.APP_ID}/${interactionToken}/messages/@original`, 'PATCH', data);
     }
 
-    deleteInteractionMessage(interactionToken: string) {
+    deleteInteractionMessage(interactionToken: string): Promise<AxiosResponse> {
         logger.info('Delete interaction message');
         return this.request(`webhooks/${this.APP_ID}/${interactionToken}/messages/@original`, 'DELETE');
     }

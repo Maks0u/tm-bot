@@ -1,24 +1,21 @@
 export default class Message {
-    private tts?: boolean;
-    private content?: string;
-    private embeds?: Embed[];
-    private allowed_mentions?: object;
-    private flags?: number;
-    private components?: Array<any>;
-    private attachments?: Array<any>;
+    private content: string;
+    private embeds: Embed[] = [];
 
-    constructor() {}
+    constructor(content: string = '') {
+        this.content = content;
+    }
 
-    setContent(text: string) {
+    setContent(text: string): Message {
         this.content = text;
         return this;
     }
-    setEmbeds(embeds: Embed[]) {
+    setEmbeds(embeds: Embed[]): Message {
         this.embeds = embeds;
         return this;
     }
-    addEmbed(embed: Embed) {
-        this.embeds?.push(embed);
+    addEmbed(embed: Embed): Message {
+        this.embeds.push({ color: 0x2b2d31, ...embed });
         return this;
     }
 }

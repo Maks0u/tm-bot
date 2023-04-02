@@ -6,6 +6,10 @@ import { InteractionResponseType, InteractionType, verifyKeyMiddleware } from 'd
 import logger, { italic, white } from 'logger';
 import Commands from './Commands.js';
 import { CommandConfig } from './Command.js';
+import Message from './Message.js';
+
+const PORT = parseInt(process.env.DISCORD_PORT || '13313');
+const HOST = process.env.DISCORD_HOST || '127.0.0.1';
 
 export default class App {
     private readonly server: express.Express = express();
@@ -33,9 +37,11 @@ export default class App {
         this.server.use(this.requestLogger.bind(this));
         this.server.use(verifyKeyMiddleware(this.PUBLIC_KEY));
         this.server.post('/interactions', this.interactions.bind(this));
+
+        this.loadCommands();
     }
 
-    start(port: number, host: string) {
+    start(port: number = PORT, host: string = HOST) {
         this.server.listen(port, host, () => {
             logger.info(`Discord app running on ${host}:${port}`);
         });
@@ -78,7 +84,10 @@ export default class App {
 
             if (InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE === commandResponse.type) {
                 const message = await incomingCommand.process(data);
-                this.updateInteractionMessage(token, message);
+                this.updateInteractionMessage(token, message).catch(reason => {
+                    logger.error(`${reason.response?.data?.message}\n${inspect(reason.response?.data?.errors, { depth: 4 })}`);
+                    this.updateInteractionMessage(token, new Message('Error'));
+                });
             }
         }
     }

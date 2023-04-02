@@ -41,15 +41,17 @@ export interface SubCommandConfig {
     name: string;
     description: string;
     type: number; // 1
-    options: (SubCommandConfig | SubCommandGroupConfig)[];
-    choices: { name: string; value: string | number }[];
+    options?: (SubCommandConfig | SubCommandGroupConfig)[];
+    choices?: { name: string; value: string | number }[];
+    required?: boolean;
 }
 export interface SubCommandGroupConfig {
     name: string;
     description: string;
     type: number; // 2
-    options: (SubCommandConfig | SubCommandGroupConfig)[];
-    choices: { name: string; value: string | number }[];
+    options?: (SubCommandConfig | SubCommandGroupConfig)[];
+    choices?: { name: string; value: string | number }[];
+    required?: boolean;
 }
 export interface IncomingCommandData {
     type: number;

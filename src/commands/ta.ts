@@ -6,29 +6,47 @@ import Message from '../Message.js';
 import Client, { escape, formatTime } from 'nadeo-client';
 const nadeoClient = new Client();
 
+const OPTION_CAMPAIGN = 'campaign';
+
 export const config: CommandConfig = {
     name: 'ta',
-    description: '1v1 SunSet TA',
+    description: 'TimeAttack times for provided campaign name',
     type: 1,
+    options: [
+        {
+            name: OPTION_CAMPAIGN,
+            description: 'Campaign name',
+            type: 3,
+            required: true,
+        },
+    ],
 };
 
 export const response: CommandResponse = {
     type: 5,
 };
 
-export async function process(data: IncomingCommandData): Promise<Message> {
-    const players: string[] = [
-        '04bffe12-8efd-46cc-9eba-6c606574e5dc',
-        '2c7c9ffd-1e43-46f2-87f0-984ed7011438',
-        '6c5f44ab-9426-46e4-b1fb-62ea8b3ef52f',
-        '724aaf97-e817-4fea-80ae-b12671c49ecd',
-        '9815388e-6929-4913-a0fd-d94f19afbd8e',
-        '9a75c1be-1eeb-4303-ad19-b77addbf7510',
-        'bf06de13-8d35-431e-9ecc-8625797ef47e',
-        'df70348a-8db0-4384-92b0-bdd909582cd4',
-    ];
+const players: string[] = [
+    '04bffe12-8efd-46cc-9eba-6c606574e5dc',
+    '2c7c9ffd-1e43-46f2-87f0-984ed7011438',
+    '6c5f44ab-9426-46e4-b1fb-62ea8b3ef52f',
+    '724aaf97-e817-4fea-80ae-b12671c49ecd',
+    '9815388e-6929-4913-a0fd-d94f19afbd8e',
+    '9a75c1be-1eeb-4303-ad19-b77addbf7510',
+    'bf06de13-8d35-431e-9ecc-8625797ef47e',
+    'df70348a-8db0-4384-92b0-bdd909582cd4',
+];
 
-    const mapUids: string[] = (await nadeoClient.getCampaign('1v1 sunset')).campaign.playlist.map(m => m.mapUid);
+export async function process(data: IncomingCommandData): Promise<Message> {
+    logger.debug(inspect(data));
+
+    const campaignName: string = data.options?.find(opt => OPTION_CAMPAIGN === opt.name).value;
+    const campaign = (await nadeoClient.getCampaign(campaignName)).campaign;
+    const mapUids: string[] = campaign.playlist.map(m => m.mapUid);
+
+    if (mapUids.length > 10) {
+        return new Message("**Error:** Can't process a campaign with more than 10 maps.");
+    }
 
     const maps: Map<
         string,
@@ -85,7 +103,7 @@ export async function process(data: IncomingCommandData): Promise<Message> {
         );
     });
 
-    const message = new Message();
+    const message = new Message(`**${escape(campaign.name)}**`);
 
     maps.forEach(map => {
         message.addEmbed({
@@ -94,5 +112,6 @@ export async function process(data: IncomingCommandData): Promise<Message> {
         });
     });
 
+    logger.debug(`Processed message\n${inspect(message)}`);
     return message;
 }

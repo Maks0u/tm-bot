@@ -9,9 +9,9 @@ export const config: CommandConfig = {
 
 export const response: CommandResponse = {
     type: 4,
-    data: new Message('Hello there!'),
+    data: new Message('https://tenor.com/view/hello-there-baby-yoda-mandolorian-hello-gif-20136589'),
 };
 
-export async function process(data: IncomingCommandData): Promise<Message> {
+export async function compute(): Promise<Message> {
     return new Message();
 }

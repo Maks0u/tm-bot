@@ -26,6 +26,7 @@ export const response: CommandResponse = {
     type: 5,
 };
 
+// TODO: get players from data/${guildId}/players.json
 const players: string[] = [
     '04bffe12-8efd-46cc-9eba-6c606574e5dc',
     '2c7c9ffd-1e43-46f2-87f0-984ed7011438',
@@ -37,7 +38,7 @@ const players: string[] = [
     'df70348a-8db0-4384-92b0-bdd909582cd4',
 ];
 
-export async function process(data: IncomingCommandData): Promise<Message> {
+export async function compute(data: IncomingCommandData): Promise<Message> {
     logger.debug(inspect(data));
 
     const campaignName: string = data.options?.find(opt => OPTION_CAMPAIGN === opt.name).value;

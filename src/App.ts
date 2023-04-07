@@ -57,6 +57,9 @@ export default class App {
     async interactions(req: Request, res: Response) {
         const { type, id, token, data, member, guild_id, channel_id } = req.body;
 
+        logger.debug(`Interaction: ${inspect(data)}`);
+        logger.debug(`Channel: ${guild_id} / ${channel_id}`);
+
         if (InteractionType.PING === type) {
             res.send({ type: InteractionResponseType.PONG });
             return;
@@ -83,7 +86,7 @@ export default class App {
             res.status(StatusCodes.OK).send(commandResponse).end();
 
             if (InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE === commandResponse.type) {
-                const message = await incomingCommand.process(data);
+                const message = await incomingCommand.compute(data, guild_id);
                 this.updateInteractionMessage(token, message).catch(reason => {
                     logger.error(`${reason.response?.data?.message}\n${inspect(reason.response?.data?.errors, { depth: 4 })}`);
                     this.updateInteractionMessage(token, new Message('Error'));

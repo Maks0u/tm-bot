@@ -4,10 +4,10 @@ export default class Command {
     private readonly config: CommandConfig;
     private readonly response: CommandResponse;
 
-    constructor(config: CommandConfig, response: CommandResponse, process: ProcessFunction) {
+    constructor(config: CommandConfig, response: CommandResponse, compute: ComputeFunction) {
         this.config = config;
         this.response = response;
-        this.process = process;
+        this.compute = compute;
     }
 
     getName(): string {
@@ -19,13 +19,13 @@ export default class Command {
     getResponse(): CommandResponse {
         return this.response;
     }
-    async process(data: IncomingCommandData): Promise<Message> {
+    async compute(data: IncomingCommandData, guildId: string): Promise<Message> {
         return new Message();
     }
 }
 
-export interface ProcessFunction {
-    (data: IncomingCommandData): Promise<Message>;
+export interface ComputeFunction {
+    (data: IncomingCommandData, guildId: string): Promise<Message>;
 }
 export interface CommandResponse {
     type: number;

@@ -1,7 +1,7 @@
-import { inspect } from 'util';
-import logger from 'logger';
 import { CommandConfig, CommandResponse, IncomingCommandData } from '../Command.js';
 import Message from '../Message.js';
+import path from 'path';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 
 import Client, { escape, formatTime } from 'nadeo-client';
 const nadeoClient = new Client();
@@ -26,20 +26,14 @@ export const response: CommandResponse = {
     type: 5,
 };
 
-// TODO: get players from data/${guildId}/players.json
-const players: string[] = [
-    '04bffe12-8efd-46cc-9eba-6c606574e5dc',
-    '2c7c9ffd-1e43-46f2-87f0-984ed7011438',
-    '6c5f44ab-9426-46e4-b1fb-62ea8b3ef52f',
-    '724aaf97-e817-4fea-80ae-b12671c49ecd',
-    '9815388e-6929-4913-a0fd-d94f19afbd8e',
-    '9a75c1be-1eeb-4303-ad19-b77addbf7510',
-    'bf06de13-8d35-431e-9ecc-8625797ef47e',
-    'df70348a-8db0-4384-92b0-bdd909582cd4',
-];
-
-export async function compute(data: IncomingCommandData): Promise<Message> {
-    logger.debug(inspect(data));
+export async function compute(data: IncomingCommandData, guildId: string): Promise<Message> {
+    const guildPath = path.join(process.cwd(), 'data', guildId);
+    const filepath = path.join(guildPath, 'players.json');
+    if (!existsSync(filepath)) {
+        mkdirSync(guildPath, { recursive: true });
+        writeFileSync(filepath, '[]', { encoding: 'utf-8' });
+    }
+    const players: string[] = JSON.parse(readFileSync(filepath, { encoding: 'utf-8' }));
 
     const campaignName: string = data.options?.find(opt => OPTION_CAMPAIGN === opt.name).value;
     const campaign = (await nadeoClient.getCampaign(campaignName)).campaign;
@@ -113,6 +107,5 @@ export async function compute(data: IncomingCommandData): Promise<Message> {
         });
     });
 
-    logger.debug(`Processed message\n${inspect(message)}`);
     return message;
 }

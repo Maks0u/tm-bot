@@ -11,7 +11,7 @@ export default class Message {
         return this;
     }
     setEmbeds(embeds: Embed[]): Message {
-        this.embeds = embeds;
+        this.embeds = embeds.map(embed => Object.assign({ color: 0x2b2d31 }, embed));
         return this;
     }
     addEmbed(embed: Embed): Message {

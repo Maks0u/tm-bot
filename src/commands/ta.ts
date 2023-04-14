@@ -1,9 +1,8 @@
 import { CommandConfig, CommandResponse, IncomingCommandData } from '../Command.js';
 import Message from '../Message.js';
-import path from 'path';
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 
 import Client, { escape, formatTime } from 'nadeo-client';
+import { getGuildPlayers } from '../utils/utils.js';
 const nadeoClient = new Client();
 
 const OPTION_CAMPAIGN = 'campaign';
@@ -27,13 +26,7 @@ export const response: CommandResponse = {
 };
 
 export async function compute(data: IncomingCommandData, guildId: string): Promise<Message> {
-    const guildPath = path.join(process.cwd(), 'data', guildId);
-    const filepath = path.join(guildPath, 'players.json');
-    if (!existsSync(filepath)) {
-        mkdirSync(guildPath, { recursive: true });
-        writeFileSync(filepath, '[]', { encoding: 'utf-8' });
-    }
-    const players: string[] = JSON.parse(readFileSync(filepath, { encoding: 'utf-8' }));
+    const players = getGuildPlayers(guildId);
 
     const campaignName: string = data.options?.find(opt => OPTION_CAMPAIGN === opt.name).value;
     const campaign = (await nadeoClient.getCampaign(campaignName)).campaign;

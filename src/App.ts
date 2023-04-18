@@ -86,11 +86,13 @@ export default class App {
             res.status(StatusCodes.OK).send(commandResponse).end();
 
             if (InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE === commandResponse.type) {
-                const message = await incomingCommand.compute(data, guild_id);
-                this.updateInteractionMessage(token, message).catch(reason => {
-                    logger.error(`${reason.response?.data?.message}\n${inspect(reason.response?.data?.errors, { depth: 4 })}`);
-                    this.updateInteractionMessage(token, new Message('Error'));
-                });
+                incomingCommand
+                    .compute(data, guild_id)
+                    .then(message => this.updateInteractionMessage(token, message))
+                    .catch(error => {
+                        logger.error(inspect(error));
+                        this.updateInteractionMessage(token, new Message('Error'));
+                    });
             }
         }
     }

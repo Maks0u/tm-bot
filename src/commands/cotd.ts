@@ -6,8 +6,8 @@ import { getGuildPlayers, getPlayerNames } from '../utils/utils.js';
 const nadeoClient = new Client();
 
 export const config: CommandConfig = {
-    name: 'totd',
-    description: 'Get TOTD records',
+    name: 'cotd',
+    description: 'Get latest COTD records',
     type: 1,
 };
 
@@ -17,29 +17,33 @@ export const response: CommandResponse = {
 
 export async function compute(data: IncomingCommandData, guildId: string): Promise<Message> {
     const accountIdList = getGuildPlayers(guildId);
-    const map = await nadeoClient.getTotdMap();
     const players = await getPlayerNames(accountIdList);
-    const records = await nadeoClient.getMapRecords(accountIdList, [map.mapId]);
+    const cotd = await nadeoClient.getCotd();
+    const records = await nadeoClient.getCompetitionRecords(`${cotd.id}`, accountIdList, 512);
 
     let formattedRecords = '';
 
     records
         .map(record => {
+            const id = record.participant;
+            const rank = record.rank;
             return {
-                accountId: record.accountId,
-                displayName: players.get(record.accountId)?.displayName,
-                time: record.recordScore.time,
+                accountId: id,
+                displayName: players.get(id)?.displayName,
+                rank: rank,
+                div: Math.floor(rank / 64) + 1,
+                divRank: rank % 64,
             };
         })
-        .sort((a, b) => a.time - b.time)
+        .sort((a, b) => a.rank - b.rank)
         .forEach(record => {
-            formattedRecords += `${formatTime(record.time)} \u00b7 ${record.displayName}\n`;
+            formattedRecords += `Div ${record.div} \u00b7 ${record.divRank} \u00b7 ${record.displayName}\n`;
         });
 
     const message = new Message().setEmbeds([
         {
-            title: escape(map.name),
-            description: `${'```'}\n${formattedRecords}${'```'}`,
+            title: escape(cotd.name),
+            description: `${'||```\n'}${formattedRecords}${'\n```||'}`,
         },
     ]);
 

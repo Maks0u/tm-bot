@@ -103,6 +103,7 @@ export default class App {
     }
 
     loadCommands(): App {
+        logger.info('Loading commands...');
         this.commands = new Commands();
         logger.debug(inspect(this.commands));
         return this;

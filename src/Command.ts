@@ -4,10 +4,10 @@ export default class Command {
     private readonly config: CommandConfig;
     private readonly response: CommandResponse;
 
-    constructor(config: CommandConfig, response: CommandResponse, compute: ComputeFunction) {
-        this.config = config;
-        this.response = response;
-        this.compute = compute;
+    constructor(config: Config) {
+        this.config = config.config;
+        this.response = config.response;
+        this.compute = config.compute;
     }
 
     getName(): string {
@@ -23,7 +23,11 @@ export default class Command {
         return new Message();
     }
 }
-
+export interface Config {
+    config: CommandConfig;
+    response: CommandResponse;
+    compute: ComputeFunction;
+}
 export interface ComputeFunction {
     (data: IncomingCommandData, guildId: string): Promise<Message>;
 }

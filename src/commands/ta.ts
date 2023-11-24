@@ -58,11 +58,6 @@ export async function compute(data: IncomingCommandData, guildId: string): Promi
         });
     }
 
-    const displayNames = new Map();
-    (await nadeoClient.getDisplayNames(players)).forEach(player => {
-        displayNames.set(player.accountId, player);
-    });
-
     const records = await nadeoClient.getMapRecords(players, Array.from(maps.keys()));
     records.forEach((record: { mapId: string; accountId: string; recordScore: { time: number } }) => {
         const map = maps.get(record.mapId);
@@ -71,7 +66,7 @@ export async function compute(data: IncomingCommandData, guildId: string): Promi
         }
         map.records.push({
             accountId: record.accountId,
-            displayName: displayNames.get(record.accountId).displayName,
+            displayName: record.accountId,
             time: record.recordScore.time,
         });
     });

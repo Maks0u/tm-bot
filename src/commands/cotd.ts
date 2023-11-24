@@ -1,8 +1,8 @@
 import { CommandConfig, CommandResponse, IncomingCommandData } from '../Command.js';
 import Message from '../Message.js';
 
-import Client, { escape, formatTime } from 'nadeo-client';
-import { getGuildPlayers, getPlayerNames } from '../utils/utils.js';
+import Client, { escape } from 'nadeo-client';
+import { getGuildPlayers } from '../utils/utils.js';
 const nadeoClient = new Client();
 
 export const config: CommandConfig = {
@@ -17,7 +17,6 @@ export const response: CommandResponse = {
 
 export async function compute(data: IncomingCommandData, guildId: string): Promise<Message> {
     const accountIdList = getGuildPlayers(guildId);
-    const players = await getPlayerNames(accountIdList);
     const cotd = await nadeoClient.getCotd();
     const records = await nadeoClient.getCompetitionRecords(`${cotd.id}`, accountIdList, 512);
 
@@ -29,7 +28,7 @@ export async function compute(data: IncomingCommandData, guildId: string): Promi
             const rank = record.rank;
             return {
                 accountId: id,
-                displayName: players.get(id)?.displayName,
+                displayName: id,
                 rank: rank,
                 div: Math.floor(rank / 64) + 1,
                 divRank: rank % 64,

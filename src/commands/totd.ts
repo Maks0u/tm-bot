@@ -2,7 +2,7 @@ import { CommandConfig, CommandResponse, IncomingCommandData } from '../Command.
 import Message from '../Message.js';
 
 import Client, { escape, formatTime } from 'nadeo-client';
-import { getGuildPlayers, getPlayerNames } from '../utils/utils.js';
+import { getGuildPlayers } from '../utils/utils.js';
 const nadeoClient = new Client();
 
 export const config: CommandConfig = {
@@ -18,7 +18,6 @@ export const response: CommandResponse = {
 export async function compute(data: IncomingCommandData, guildId: string): Promise<Message> {
     const accountIdList = getGuildPlayers(guildId);
     const map = await nadeoClient.getTotdMap();
-    const players = await getPlayerNames(accountIdList);
     const records = await nadeoClient.getMapRecords(accountIdList, [map.mapId]);
 
     let formattedRecords = '';
@@ -27,7 +26,7 @@ export async function compute(data: IncomingCommandData, guildId: string): Promi
         .map(record => {
             return {
                 accountId: record.accountId,
-                displayName: players.get(record.accountId)?.displayName,
+                displayName: record.accountId,
                 time: record.recordScore.time,
             };
         })
